@@ -29,6 +29,8 @@ from .protocol import (
 from .util import byte2int, int2byte
 from . import err, VERSION_STRING
 
+BUFLEN=32768
+
 try:
     import ssl
     SSL_ENABLED = True
@@ -182,6 +184,9 @@ class Connection(object):
                  auth_plugin_map={}, read_timeout=None, write_timeout=None,
                  bind_address=None, binary_prefix=False, program_name=None,
                  server_public_key=None):
+        self._rbuf = bytearray()
+        self._rbuf_offset = 0
+
         if use_unicode is None and sys.version_info[0] > 2:
             use_unicode = True
 
@@ -690,10 +695,19 @@ class Connection(object):
         return packet
 
     async def _read_bytes(self, num_bytes):
-        rdata = b""
-        while self._sock is not None and len(rdata) < num_bytes:
+        rbuf = self._rbuf
+        if len(rbuf)-self._rbuf_offset >= num_bytes:
+            rdata = bytes(rbuf[self._rbuf_offset:self._rbuf_offset+num_bytes])
+            self._rbuf_offset += num_bytes
+            return rdata
+
+        del rbuf[:self._rbuf_offset]
+        self._rbuf_offset = 0
+
+        while self._sock is not None and len(rbuf) < num_bytes:
+            missing = num_bytes-len(rbuf)
             try:
-                data = await self._sock.receive_some(num_bytes-len(rdata))
+                data = await self._sock.receive_some(max(missing,BUFLEN))
             except trio.BrokenResourceError as e:
                 self._force_close()
                 raise err.OperationalError(
@@ -706,11 +720,13 @@ class Connection(object):
             else:
                 if data == b"":
                     break
-                rdata += data
-        if len(rdata) < num_bytes:
+                rbuf += data
+        if len(rbuf) < num_bytes:
             self._force_close()
             raise err.OperationalError(
                 CR.CR_SERVER_LOST, "Lost connection to MySQL server during query")
+        rdata = bytes(rbuf[:num_bytes])
+        self._rbuf_offset = num_bytes
         return rdata
 
     async def _write_bytes(self, data):
