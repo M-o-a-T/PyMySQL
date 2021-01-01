@@ -28,7 +28,7 @@ class Test_MySQLdb(capabilities.DatabaseTest):
         from datetime import timedelta
         def generator(row,col):
             return timedelta(0, row*8000)
-        self.check_data_integrity(
+        await self.check_data_integrity(
                  ('col1 TIME',),
                  generator)
 
@@ -41,7 +41,7 @@ class Test_MySQLdb(capabilities.DatabaseTest):
             if v > 127:
                 v = v-256
             return v
-        self.check_data_integrity(
+        await self.check_data_integrity(
             ('col1 TINYINT',),
             generator)
 
@@ -84,7 +84,7 @@ class Test_MySQLdb(capabilities.DatabaseTest):
             if i == 62: return ''
             if i == 63: return None
             return chr(i)
-        self.check_data_integrity(
+        await self.check_data_integrity(
             ('col1 char(1)','col2 char(1)'),
             generator)
 
