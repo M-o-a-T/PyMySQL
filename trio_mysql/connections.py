@@ -335,15 +335,6 @@ class Connection(object):
         ctx.options |= ssl.OP_NO_SSLv3
         return ctx
 
-    async def __aexit__(self, *tb):
-        if self._curs is not None:
-            c,self._curs = self._curs,None
-            return await c.__aexit__(*tb)
-
-        with trio.move_on_after(1) as scope:
-            scope.shield = True
-            await self.aclose()
-
     async def aclose(self):
         """
         Send the quit message and close the socket.
@@ -580,6 +571,15 @@ class Connection(object):
                 self._curs = None
                 raise
         raise RuntimeError("You can't nest cursors")
+
+    async def __aexit__(self, *tb):
+        if self._curs is not None:
+            c,self._curs = self._curs,None
+            return await c.__aexit__(*tb)
+
+        with trio.move_on_after(1) as scope:
+            scope.shield = True
+            await self.aclose()
 
     async def connect(self, sock=None):
         self._closed = False
