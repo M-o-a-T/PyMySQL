@@ -4,6 +4,18 @@
 
 This clone of PyMySQL has been Trio-ized.
 
+### v0.10.1
+
+Release date: 2021-01-01
+
+* Upstream changed to not showing MySQL warnings by default because they
+  caused too many spurious support issues. Trio-MySQL rejects and reverts
+  this change. Ignoring warnings is dangerous. Don't do it.
+* The `.travis` subdirectory has been dropped. Travis is no longer friendly
+  to open source.
+* Tests for ed25519 (MariaDB 10.x) and sha256 (MySQL 8.x) auth are skipped,
+  for now
+
 
 ## v0.10.1
 
@@ -23,9 +35,6 @@ This version is the last version supporting Python 2.7.
 * Python 3.4 support is dropped.
 * Context manager interface is removed from `Connection`. It will be added
   with different meaning.
-* MySQL warnings are not shown by default because many user report issue to
-  PyMySQL issue tracker when they see warning. You need to call "SHOW WARNINGS"
-  explicitly when you want to see warnings.
 * Formatting of float object is changed from "3.14" to "3.14e0".
 * Use cp1252 codec for latin1 charset.
 * Fix decimal literal.
