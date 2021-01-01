@@ -15,6 +15,7 @@ Release date: 2021-01-01
   to open source.
 * Tests for ed25519 (MariaDB 10.x) and sha256 (MySQL 8.x) auth are skipped,
   for now
+* read_timeout and write_timeout options removed (no-ops).
 
 
 ## v0.10.1

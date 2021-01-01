@@ -118,8 +118,6 @@ class Connection(object):
         the interface from which to connect to the host. Argument can be
         a hostname or an IP address.
     :param unix_socket: Optionally, you can use a unix socket rather than TCP/IP.
-    :param read_timeout: The timeout for reading from the connection in seconds (default: None - no timeout)
-    :param write_timeout: The timeout for writing to the connection in seconds (default: None - no timeout)
     :param charset: Charset you want to use.
     :param sql_mode: Default SQL_MODE to use.
     :param read_default_file:
@@ -181,7 +179,7 @@ class Connection(object):
                  compress=None, named_pipe=None,
                  autocommit=False, db=None, passwd=None, local_infile=False,
                  max_allowed_packet=16*1024*1024, defer_connect=False,
-                 auth_plugin_map={}, read_timeout=None, write_timeout=None,
+                 auth_plugin_map={},
                  bind_address=None, binary_prefix=False, program_name=None,
                  server_public_key=None):
         self._rbuf = bytearray()
@@ -261,12 +259,6 @@ class Connection(object):
         if not (0 < connect_timeout <= 31536000):
             raise ValueError("connect_timeout should be >0 and <=31536000")
         self.connect_timeout = connect_timeout or None
-        if read_timeout is not None and read_timeout <= 0:
-            raise ValueError("read_timeout should be > 0")
-        self._read_timeout = read_timeout
-        if write_timeout is not None and write_timeout <= 0:
-            raise ValueError("write_timeout should be > 0")
-        self._write_timeout = write_timeout
         if charset:
             self.charset = charset
             self.use_unicode = True
