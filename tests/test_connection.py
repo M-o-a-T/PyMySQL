@@ -587,17 +587,6 @@ class TestConnection(base.TrioMySQLTestCase):
             await c.aclose()
             await sock.aclose()
 
-    @pytest.mark.skipif(sys.version_info[0:2] < (3,2), reason="required py-3.2")
-    @pytest.mark.trio
-    async def test_no_delay_warning(self, set_me_up):
-        await set_me_up(self)
-        current_db = self.databases[0].copy()
-        current_db['no_delay'] =  True
-        with self.assertWarns(DeprecationWarning) as cm:
-            conn = trio_mysql.connect(**current_db)
-            await conn.connect()
-            await conn.aclose()
-
 
 # A custom type and function to escape it
 class Foo(object):
