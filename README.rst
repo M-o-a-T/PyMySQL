@@ -114,13 +114,14 @@ The following examples make use of a simple table
         # your changes.
         conn.commit()
 
-        # Alternately, you can set up a transaction:
+        # You can set up a transaction:
         async with conn.transaction():
             async with conn.cursor() as cursor:
                 # Create a new record
                 sql = "INSERT INTO `users` (`email`, `password`) VALUES (%s, %s)"
                 await cursor.execute(sql, ('webmistress@python.org', 'totally-secret'))
 
+        # ... or use a cursor directly, for autocommit:
         async with conn.cursor() as cursor:
             # Read a single record
             sql = "SELECT `id`, `password` FROM `users` WHERE `email`=%s"
