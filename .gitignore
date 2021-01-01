@@ -15,6 +15,8 @@ __pycache__
 /PyMySQL.egg-info
 /build
 /tests/databases.json
+/t
+/.pytest_cache
 
 /.idea
 docs/build

@@ -106,6 +106,7 @@ def get_client_info():  # for MySQLdb compatibility
 
 connect = Connection = Connect
 
+# we include a doctored version_info here for MySQLdb compatibility
 version_info = (0, 1, 0, "alpha", 0)
 
 NULL = "NULL"

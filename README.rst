@@ -34,7 +34,7 @@ Requirements
 
 * Python -- one of the following:
 
-  - CPython_ >= 3.5
+  - CPython_ >= 3.6
   - PyPy_ >= 5.5
 
 * MySQL Server -- one of the following:
@@ -61,6 +61,11 @@ To use "sha256_password" or "caching_sha2_password" for authenticate,
 you need to install additional dependency::
 
    $ python3 -m pip install trio_mysql[rsa]
+
+To use MariaDB's "ed25519" authentication method, you need to install
+additional dependency::
+
+   $ python3 -m pip install PyMySQL[ed25519]
 
 
 Documentation

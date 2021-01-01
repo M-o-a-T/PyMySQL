@@ -1,7 +1,7 @@
 # Python implementation of the MySQL client-server protocol
 # http://dev.mysql.com/doc/internals/en/client-server-protocol.html
 # Error codes:
-# http://dev.mysql.com/doc/refman/5.5/en/error-messages-client.html
+# https://dev.mysql.com/doc/refman/5.5/en/error-handling.html
 from __future__ import print_function
 from ._compat import  JYTHON, IRONPYTHON
 
@@ -126,7 +126,7 @@ class Connection(object):
         Specifies  my.cnf file to read these parameters from under the [client] section.
     :param conv:
         Conversion dictionary to use instead of the default one.
-        This is used to provide custom marshalling and unmarshaling of types.
+        This is used to provide custom marshalling and unmarshalling of types.
         See converters.
     :param use_unicode:
         Whether or not to default to unicode strings.
@@ -150,7 +150,7 @@ class Connection(object):
         The class needs an async ``authenticate`` method taking an authentication packet as
         an argument.  For the dialog plugin, a prompt(echo, prompt) method can be used
         (if no authenticate method) for returning a string from the user. (experimental)
-    :param server_public_key: SHA256 authenticaiton plugin public key value. (default: None)
+    :param server_public_key: SHA256 authentication plugin public key value. (default: None)
     :param db: Alias for database. (for compatibility to MySQLdb)
     :param passwd: Alias for password. (for compatibility to MySQLdb)
     :param binary_prefix: Add _binary prefix on bytes and bytearray. (default: False)
@@ -249,6 +249,8 @@ class Connection(object):
 
         self.host = host or "localhost"
         self.port = port or 3306
+        if type(self.port) is not int:
+            raise ValueError("port should be of type int")
         self.user = user or DEFAULT_USER
         self.password = password or b""
         if isinstance(self.password, str):
@@ -260,10 +262,10 @@ class Connection(object):
             raise ValueError("connect_timeout should be >0 and <=31536000")
         self.connect_timeout = connect_timeout or None
         if read_timeout is not None and read_timeout <= 0:
-            raise ValueError("read_timeout should be >= 0")
+            raise ValueError("read_timeout should be > 0")
         self._read_timeout = read_timeout
         if write_timeout is not None and write_timeout <= 0:
-            raise ValueError("write_timeout should be >= 0")
+            raise ValueError("write_timeout should be > 0")
         self._write_timeout = write_timeout
         if charset:
             self.charset = charset
@@ -646,9 +648,9 @@ class Connection(object):
 
     async def write_packet(self, payload):
         """Writes an entire "mysql packet" in its entirety to the network
-        addings its length and sequence number.
+        adding its length and sequence number.
         """
-        # Internal note: when you build packet manualy and calls _write_bytes()
+        # Internal note: when you build packet manually and calls _write_bytes()
         # directly, you should set self._next_seq_id properly.
         data = pack_int24(len(payload)) + int2byte(self._next_seq_id) + payload
         if DEBUG: dump_packet(data)
@@ -662,7 +664,7 @@ class Connection(object):
         :raise OperationalError: If the connection to the MySQL server is lost.
         :raise InternalError: If the packet sequence number is wrong.
         """
-        buff = b''
+        buff = bytearray()
         while True:
             packet_header = await self._read_bytes(4)
             #if DEBUG: dump_packet(packet_header)
@@ -690,8 +692,11 @@ class Connection(object):
             if bytes_to_read < MAX_PACKET_LEN:
                 break
 
-        packet = packet_type(buff, self.encoding)
-        packet.check_error()
+        packet = packet_type(bytes(buff), self.encoding)
+        if packet.is_error_packet():
+            if self._result is not None and self._result.unbuffered_active is True:
+                self._result.unbuffered_active = False
+            packet.raise_for_error()
         return packet
 
     async def _read_bytes(self, num_bytes):
@@ -923,6 +928,8 @@ class Connection(object):
             return _auth.sha256_password_auth(self, auth_packet)
         elif plugin_name == b"mysql_native_password":
             data = _auth.scramble_native_password(self.password, auth_packet.read_all())
+        elif plugin_name == b'client_ed25519':
+            data = _auth.ed25519_password(self.password, auth_packet.read_all())
         elif plugin_name == b"mysql_old_password":
             data = _auth.scramble_old_password(self.password, auth_packet.read_all()) + b'\0'
         elif plugin_name == b"mysql_clear_password":
@@ -1281,7 +1288,7 @@ class LoadLocalFile(object):
     async def send_data(self):
         """Send data packets from the local file to the server"""
         if not self.connection._sock:
-            raise err.InterfaceError("(0, '')")
+            raise err.InterfaceError(0, '')
         conn = self.connection
 
         try:

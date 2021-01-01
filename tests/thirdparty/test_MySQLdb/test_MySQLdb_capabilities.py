@@ -3,6 +3,7 @@ import pytest
 from . import capabilities
 import trio_mysql
 from tests import base
+import pymysql
 import warnings
 
 warnings.filterwarnings('error')
@@ -109,7 +110,7 @@ class Test_MySQLdb(capabilities.DatabaseTest):
     @pytest.mark.trio
     async def test_literal_float(self, set_me_up):
         await set_me_up(self)
-        self.assertTrue("3.1415" == self.connection.literal(3.1415))
+        self.assertEqual("3.1415e0", self.connection.literal(3.1415))
 
     @pytest.mark.trio
     async def test_literal_string(self, set_me_up):

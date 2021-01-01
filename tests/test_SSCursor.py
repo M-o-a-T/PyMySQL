@@ -99,7 +99,7 @@ class TestSSCursor(base.TrioMySQLTestCase):
             self.assertListEqual(list(cursor), [(3, )])
             self.assertFalse(cursor.nextset())
 
-        cursor.execute('DROP TABLE IF EXISTS tz_data')
+        await cursor.execute('DROP TABLE IF EXISTS tz_data')
         await cursor.aclose()
 
 __all__ = ["TestSSCursor"]

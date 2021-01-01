@@ -5,6 +5,34 @@
 This clone of PyMySQL has been Trio-ized.
 
 
+## v0.10.1
+
+Release date: 2020-09-10
+
+* Fix missing import of ProgrammingError. (#878)
+* Fix auth switch request handling. (#890)
+
+
+## v0.10.0
+
+Release date: 2020-07-18
+
+This version is the last version supporting Python 2.7.
+
+* MariaDB ed25519 auth is supported.
+* Python 3.4 support is dropped.
+* Context manager interface is removed from `Connection`. It will be added
+  with different meaning.
+* MySQL warnings are not shown by default because many user report issue to
+  PyMySQL issue tracker when they see warning. You need to call "SHOW WARNINGS"
+  explicitly when you want to see warnings.
+* Formatting of float object is changed from "3.14" to "3.14e0".
+* Use cp1252 codec for latin1 charset.
+* Fix decimal literal.
+* TRUNCATED_WRONG_VALUE_FOR_FIELD, and ILLEGAL_VALUE_FOR_TYPE are now
+  DataError instead of InternalError.
+
+
 ## 0.9.3
 
 Release date: 2018-12-18
@@ -21,7 +49,7 @@ Release date: 2018-12-18
 
 Release date: 2018-07-04
 
-* Disalbled unintentinally enabled debug log
+* Disabled unintentinally enabled debug log
 * Removed unintentionally installed tests
 
 
@@ -58,7 +86,7 @@ Release date: 2018-05-07
 * Many test suite improvements, especially adding MySQL 8.0 and using Docker.
   Thanks to Daniel Black.
 
-* Droppped support for old Python and MySQL whih is not tested long time.
+* Dropped support for old Python and MySQL which is not tested long time.
 
 
 ## 0.8

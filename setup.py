@@ -28,6 +28,7 @@ setup(
     ],
     extras_require={
         "rsa": ["cryptography"],
+        "ed25519": ["PyNaCl>=1.4.0"],
     },
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
@@ -38,6 +39,8 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Intended Audience :: Developers',
